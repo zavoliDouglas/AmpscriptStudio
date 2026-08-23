@@ -1,0 +1,76 @@
+/* sidepanel/styles.css — tema escuro aproximando o mockup */
+:root {
+  --bg: #0c0c0e;
+  --panel: #17171a;
+  --panel-2: #1f1f24;
+  --border: #2b2b31;
+  --text: #e8e8ea;
+  --muted: #8a8a92;
+  --accent: #3b82f6;
+  --accent-soft: #1d3357;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.app { display: flex; flex-direction: column; gap: 12px; padding: 14px; min-width: 340px; }
+
+.app__header { display: flex; align-items: center; gap: 10px; }
+.app__logo {
+  width: 34px; height: 34px; border-radius: 8px; background: var(--accent);
+  display: grid; place-items: center; font-weight: 700; color: #fff;
+}
+.app__title { margin: 0; font-size: 15px; }
+.app__asset { margin: 0; font-size: 12px; color: var(--muted); }
+.app__gear { margin-left: auto; background: none; border: 0; color: var(--muted); font-size: 16px; cursor: pointer; }
+
+.tabs { display: flex; gap: 6px; background: var(--panel-2); padding: 4px; border-radius: 8px; }
+.tab {
+  flex: 1; padding: 7px; border: 0; border-radius: 6px; cursor: pointer;
+  background: transparent; color: var(--muted); font-size: 13px;
+}
+.tab--active { background: var(--panel); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.4); }
+
+.section-head { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+.muted { color: var(--muted); font-weight: 400; }
+
+.editor {
+  width: 100%; min-height: 220px; resize: vertical;
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px; padding: 10px;
+  font: 12px/1.6 var(--mono); tab-size: 2; white-space: pre;
+}
+
+.actions { display: flex; gap: 8px; }
+.btn {
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--panel-2); color: var(--text); cursor: pointer; font-size: 13px;
+}
+.btn:hover { background: var(--panel); }
+.btn--primary { flex: 1; background: var(--panel); }
+.btn:disabled { opacity: .6; cursor: default; }
+
+.diag { display: flex; flex-direction: column; gap: 8px; }
+.badge { background: var(--accent-soft); color: #9dc0ff; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+.diag__empty { margin: 4px 0; }
+.diag__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.diag__item { display: flex; align-items: flex-start; gap: 10px; }
+.diag__icon { width: 18px; text-align: center; color: var(--muted); }
+.diag__item--error .diag__icon { color: #f87171; }
+.diag__item--warning .diag__icon { color: #fbbf24; }
+.diag__body { flex: 1; }
+.diag__title { font-weight: 600; }
+.diag__detail { font-size: 12px; }
+.diag__line { color: var(--muted); font: 12px var(--mono); }
+
+.app__footer {
+  display: flex; justify-content: space-between; border-top: 1px solid var(--border);
+  padding-top: 10px; font-size: 12px;
+}

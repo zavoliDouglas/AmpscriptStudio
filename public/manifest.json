@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "AMP Studio",
+  "version": "0.1.0",
+  "description": "Formata e valida AMPscript e SSJS dentro do Content Builder (Salesforce Marketing Cloud).",
+  "permissions": ["sidePanel", "storage", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://*.marketingcloudapps.com/*",
+    "https://*.exacttarget.com/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "Abrir AMP Studio"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.marketingcloudapps.com/*", "https://*.exacttarget.com/*"],
+      "js": ["content/contentBuilder.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ]
+}

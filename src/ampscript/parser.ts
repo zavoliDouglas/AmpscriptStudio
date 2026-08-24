@@ -4,7 +4,7 @@
 // AST completa fica como TODO para evoluirmos juntos — a base de tokens já
 // permite crescer para lá quando precisarmos (ex.: análise de tipos, escopo).
 
-import { segmentTemplate, SegmentType, lex, TokenType } from './tokenizer';
+import { segmentTemplate, SegmentType, lex, TokenType, isCodeBlock } from './tokenizer';
 import type { Diagnostic } from '../shared/types';
 
 export function analyzeStructure(source: string): Diagnostic[] {
@@ -14,7 +14,9 @@ export function analyzeStructure(source: string): Diagnostic[] {
       diags.push(err('structure', 'Bloco não fechado', 'Abra %%[ e feche com ]%%.'));
     } else if (seg.type === SegmentType.INLINE && seg.unterminated) {
       diags.push(err('structure', 'Saída inline não fechada', 'Feche a saída %%= ... =%%.'));
-    } else if (seg.type === SegmentType.BLOCK && seg.inner != null) {
+    } else if (seg.type === SegmentType.SCRIPT && seg.unterminated) {
+      diags.push(err('structure', 'Bloco <script> não fechado', 'Feche o bloco com </script>.'));
+    } else if (isCodeBlock(seg) && seg.inner != null) {
       analyzeBlock(seg.inner, diags);
     }
   }

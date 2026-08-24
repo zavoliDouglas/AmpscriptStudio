@@ -4,11 +4,19 @@
 
 import { checkSpacing } from './spacing';
 import { checkIndentation } from './indentation';
+import { checkUnknownFunctions } from './unknown-function';
+import { checkInline } from './inline';
+import { checkMessageContext } from './message-context';
+import { checkArgCount } from './arg-count';
 import type { Diagnostic } from '../../shared/types';
 
 export function runRules(source: string): Diagnostic[] {
   return [
     ...checkSpacing(source),
     ...checkIndentation(source),
+    ...checkUnknownFunctions(source),
+    ...checkInline(source),
+    ...checkMessageContext(source),
+    ...checkArgCount(source),
   ];
 }

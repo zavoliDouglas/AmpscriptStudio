@@ -2,7 +2,7 @@
 // Detecta comandos dentro de IF/FOR que não estão indentados.
 // Corresponde ao diagnóstico "Indentação recomendada" do mockup.
 
-import { segmentTemplate, SegmentType, lex, TokenType, type Token } from '../tokenizer';
+import { segmentTemplate, lex, TokenType, isCodeBlock, type Token } from '../tokenizer';
 import type { Diagnostic } from '../../shared/types';
 
 const UNIT = 2; // espaços esperados por nível
@@ -10,7 +10,7 @@ const UNIT = 2; // espaços esperados por nível
 export function checkIndentation(source: string): Diagnostic[] {
   const diags: Diagnostic[] = [];
   for (const seg of segmentTemplate(source)) {
-    if (seg.type !== SegmentType.BLOCK || seg.inner == null) continue;
+    if (!isCodeBlock(seg) || seg.inner == null) continue;
     checkBlock(seg.inner, diags);
   }
   return diags;

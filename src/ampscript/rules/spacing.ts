@@ -2,13 +2,13 @@
 // Detecta falta de espaço após vírgulas e ao redor de operadores.
 // Corresponde ao diagnóstico "Espaçamento inconsistente" do mockup.
 
-import { segmentTemplate, SegmentType, lex, needSpace, TokenType, type Token } from '../tokenizer';
+import { segmentTemplate, lex, needSpace, TokenType, isCodeBlock, type Token } from '../tokenizer';
 import type { Diagnostic } from '../../shared/types';
 
 export function checkSpacing(source: string): Diagnostic[] {
   const diags: Diagnostic[] = [];
   for (const seg of segmentTemplate(source)) {
-    if (seg.type !== SegmentType.BLOCK || seg.inner == null) continue;
+    if (!isCodeBlock(seg) || seg.inner == null) continue;
     const tokens = lex(seg.inner);
     let prevMeaningful: Token | null = null;
     let sawSpaceSincePrev = false;

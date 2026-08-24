@@ -23,7 +23,8 @@ ENDIF
 const ASSET_NAME = 'MC_CAP_DEMO_SVM_DN_FREE';
 
 export function App() {
-  const [language, setLanguage] = useState<Language>('ampscript');
+  // Por enquanto só AMPscript; a aba SSJS está bloqueada (em breve).
+  const language: Language = 'ampscript';
   const [code, setCode] = useState(SAMPLE);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -60,18 +61,18 @@ export function App() {
         <button
           role="tab"
           aria-selected={language === 'ampscript'}
-          className={`tab ${language === 'ampscript' ? 'tab--active' : ''}`}
-          onClick={() => setLanguage('ampscript')}
+          className="tab tab--active"
         >
           AMPscript
         </button>
         <button
           role="tab"
-          aria-selected={language === 'ssjs'}
-          className={`tab ${language === 'ssjs' ? 'tab--active' : ''}`}
-          onClick={() => setLanguage('ssjs')}
+          aria-selected={false}
+          className="tab tab--disabled"
+          disabled
+          title="Em breve"
         >
-          SSJS
+          SSJS <span className="tab__soon">em breve</span>
         </button>
       </div>
 

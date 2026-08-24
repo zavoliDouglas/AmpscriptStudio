@@ -74,3 +74,11 @@ body {
   display: flex; justify-content: space-between; border-top: 1px solid var(--border);
   padding-top: 10px; font-size: 12px;
 }
+
+/* aba desabilitada (SSJS em breve) */
+.tab--disabled { opacity: .55; cursor: not-allowed; }
+.tab__soon {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .5px;
+  background: var(--panel); color: var(--muted);
+  padding: 1px 6px; border-radius: 999px; margin-left: 6px;
+}

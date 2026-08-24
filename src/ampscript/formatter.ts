@@ -2,7 +2,8 @@
 // Reemite o AMPscript formatado: keywords em MAIÚSCULO, espaçamento
 // consistente e indentação por nível de IF/FOR. Não toca no HTML.
 
-import { segmentTemplate, SegmentType, lex, needSpace, TokenType, type Token } from './tokenizer';
+import { segmentTemplate, SegmentType, lex, needSpace, TokenType, KEYWORD_CANONICAL, type Token } from './tokenizer';
+import { canonicalName } from './data/functions';
 
 const INDENT = '  '; // 2 espaços
 
@@ -25,8 +26,15 @@ function firstKeyword(line: Token[]): string | null {
 function renderTokens(line: Token[]): string {
   let out = '';
   let prev: Token | null = null;
-  for (const t of line) {
-    const val = t.type === TokenType.KEYWORD ? t.value.toUpperCase() : t.value;
+  for (let idx = 0; idx < line.length; idx++) {
+    const t = line[idx];
+    let val = t.value;
+    if (t.type === TokenType.KEYWORD) {
+      val = KEYWORD_CANONICAL[t.value.toUpperCase()] ?? t.value;
+    } else if (t.type === TokenType.IDENT && line[idx + 1]?.type === TokenType.LPAREN) {
+      // Chamada de função: normaliza para a grafia canônica do catálogo.
+      val = canonicalName(t.value) ?? t.value;
+    }
     if (prev && needSpace(prev, t)) out += ' ';
     out += val;
     prev = t;
@@ -58,6 +66,13 @@ export function formatInlineInner(inner: string): string {
   return renderTokens(tokens);
 }
 
+function indentBody(inner: string): string {
+  return formatBlockInner(inner)
+    .split('\n')
+    .map((l) => (l ? INDENT + l : ''))
+    .join('\n');
+}
+
 export function formatAmpscript(source: string): string {
   let out = '';
   for (const seg of segmentTemplate(source)) {
@@ -65,13 +80,13 @@ export function formatAmpscript(source: string): string {
       out += seg.value;
     } else if (seg.type === SegmentType.INLINE) {
       out += seg.unterminated ? seg.value : `%%=${formatInlineInner(seg.inner ?? '')}=%%`;
+    } else if (seg.type === SegmentType.SCRIPT) {
+      if (seg.unterminated) { out += seg.value; continue; }
+      const body = indentBody(seg.inner ?? '');
+      out += `${seg.openTag}\n${body}\n${seg.closeTag}`;
     } else {
       if (seg.unterminated) { out += seg.value; continue; }
-      const body = formatBlockInner(seg.inner ?? '')
-        .split('\n')
-        .map((l) => (l ? INDENT + l : ''))
-        .join('\n');
-      out += `%%[\n${body}\n]%%`;
+      out += `%%[\n${indentBody(seg.inner ?? '')}\n]%%`;
     }
   }
   return out;

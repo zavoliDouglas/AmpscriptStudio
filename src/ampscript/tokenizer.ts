@@ -10,15 +10,24 @@ export const SegmentType = {
   HTML: 'html',
   BLOCK: 'block',   // %%[ ... ]%%
   INLINE: 'inline', // %%= ... =%%
+  SCRIPT: 'script', // <script runat="server" language="ampscript"> ... </script>
 } as const;
 export type SegmentKind = (typeof SegmentType)[keyof typeof SegmentType];
 
 export interface Segment {
   type: SegmentKind;
   value: string;
-  /** Conteúdo interno (sem os delimitadores) — só para BLOCK/INLINE. */
+  /** Conteúdo interno (sem os delimitadores) — para BLOCK/INLINE/SCRIPT. */
   inner?: string;
   unterminated?: boolean;
+  /** Só para SCRIPT: a tag de abertura e fechamento preservadas. */
+  openTag?: string;
+  closeTag?: string;
+}
+
+/** Um segmento é bloco de código AMPscript (bloco %%[ ]%% ou tag-based)? */
+export function isCodeBlock(seg: Segment): boolean {
+  return seg.type === SegmentType.BLOCK || seg.type === SegmentType.SCRIPT;
 }
 
 export function segmentTemplate(input: string): Segment[] {
@@ -56,6 +65,27 @@ export function segmentTemplate(input: string): Segment[] {
       });
       i = end;
       htmlStart = i;
+    } else if (input[i] === '<' && input.slice(i, i + 7).toLowerCase() === '<script') {
+      const tag = input.slice(i).match(/^<script\b[^>]*>/i)?.[0];
+      if (tag && /runat\s*=\s*["']server["']/i.test(tag) && /language\s*=\s*["']ampscript["']/i.test(tag)) {
+        pushHtml(i);
+        const after = i + tag.length;
+        const cm = input.slice(after).match(/<\/script\s*>/i);
+        const innerEnd = cm ? after + (cm.index ?? 0) : n;
+        const end = cm ? innerEnd + cm[0].length : n;
+        segments.push({
+          type: SegmentType.SCRIPT,
+          value: input.slice(i, end),
+          inner: input.slice(after, innerEnd),
+          openTag: tag,
+          closeTag: cm ? cm[0] : '',
+          unterminated: !cm,
+        });
+        i = end;
+        htmlStart = i;
+      } else {
+        i++;
+      }
     } else {
       i++;
     }
@@ -94,6 +124,19 @@ export interface Token {
 export const KEYWORDS = new Set([
   'SET', 'VAR', 'IF', 'THEN', 'ELSEIF', 'ELSE', 'ENDIF',
   'FOR', 'TO', 'DOWNTO', 'DO', 'NEXT', 'AND', 'OR', 'NOT',
+]);
+
+// Caixa canônica das keywords. A doc da Salesforce (Case Sensitivity) usa
+// Pascal case por convenção; adotamos o mesmo padrão no formatador.
+export const KEYWORD_CANONICAL: Record<string, string> = {
+  SET: 'Set', VAR: 'Var', IF: 'If', THEN: 'Then', ELSEIF: 'ElseIf', ELSE: 'Else',
+  ENDIF: 'EndIf', FOR: 'For', TO: 'To', DOWNTO: 'DownTo', DO: 'Do', NEXT: 'Next',
+  AND: 'And', OR: 'Or', NOT: 'Not',
+};
+
+// Keywords que iniciam declaração/statement — proibidas em AMPscript inline.
+export const STATEMENT_KEYWORDS = new Set([
+  'SET', 'VAR', 'IF', 'THEN', 'ELSEIF', 'ELSE', 'ENDIF', 'FOR', 'TO', 'DOWNTO', 'DO', 'NEXT',
 ]);
 
 const isIdentStart = (c: string) => /[A-Za-z_]/.test(c);
